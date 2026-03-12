@@ -12,7 +12,11 @@ export const STORAGE_KEY = 'mermaid-code';
 
 export const DEBOUNCE_DELAY = 300;
 
-export const EXPORT_PIXEL_RATIO = 2;
+export const EXPORT_PIXEL_RATIO = 3;
+
+// Minimum export dimensions to ensure good quality
+export const MIN_EXPORT_WIDTH = 2000;
+export const MIN_EXPORT_HEIGHT = 1500;
 
 export const MERMAID_CONFIG: MermaidConfig = {
     startOnLoad: false,
