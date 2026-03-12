@@ -6,6 +6,7 @@ import { Toolbar } from './components/Toolbar';
 import { useMermaid } from './hooks/useMermaid';
 import { useExport } from './hooks/useExport';
 import { useDebounce } from './hooks/useDebounce';
+import { useTheme } from './hooks/useTheme';
 import { DEFAULT_CODE, STORAGE_KEY, DEBOUNCE_DELAY } from './utils/constants';
 import './styles/App.css';
 
@@ -18,6 +19,7 @@ export function App() {
     const debouncedCode = useDebounce(code, DEBOUNCE_DELAY);
     const { svg, error, isRendering } = useMermaid(debouncedCode);
     const { exportToPng, exportToJpg, isExporting } = useExport();
+    const { theme, toggleTheme } = useTheme();
 
     useEffect(() => {
         localStorage.setItem(STORAGE_KEY, code);
@@ -45,6 +47,8 @@ export function App() {
                     onExportJpg={handleExportJpg}
                     isExporting={isExporting}
                     disabled={!svg}
+                    theme={theme}
+                    onToggleTheme={toggleTheme}
                 />
                 <div class="main-content">
                     <div class="editor-panel">

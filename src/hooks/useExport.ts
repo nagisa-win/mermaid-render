@@ -1,12 +1,22 @@
 import { useState, useCallback } from 'preact/hooks';
 import { toPng, toJpeg } from 'html-to-image';
-import { EXPORT_PIXEL_RATIO } from '../utils/constants';
+import { EXPORT_PIXEL_RATIO, MIN_EXPORT_WIDTH, MIN_EXPORT_HEIGHT } from '../utils/constants';
 
 interface UseExportResult {
     exportToPng: (element: HTMLElement, filename: string) => Promise<void>;
     exportToJpg: (element: HTMLElement, filename: string) => Promise<void>;
     isExporting: boolean;
     error: string | null;
+}
+
+function calculatePixelRatio(width: number, height: number): number {
+    // Calculate the ratio needed to meet minimum dimensions
+    const widthRatio = MIN_EXPORT_WIDTH / width;
+    const heightRatio = MIN_EXPORT_HEIGHT / height;
+    const minRatio = Math.max(widthRatio, heightRatio, 1);
+
+    // Use the higher of base ratio or calculated ratio, capped at 4
+    return Math.min(Math.max(EXPORT_PIXEL_RATIO, minRatio), 4);
 }
 
 export function useExport(): UseExportResult {
@@ -31,6 +41,10 @@ export function useExport(): UseExportResult {
             const originalTransform = element.style.transform;
             const originalOverflow = element.style.overflow;
 
+            // Get current theme background color
+            const computedStyle = getComputedStyle(document.documentElement);
+            const backgroundColor = computedStyle.getPropertyValue('--background-color').trim();
+
             try {
                 // Reset transform and hide scrollbar for export
                 element.style.transform = 'none';
@@ -38,11 +52,15 @@ export function useExport(): UseExportResult {
 
                 // Get the SVG element for accurate dimensions
                 const svg = element.querySelector('svg');
+                let pixelRatio = EXPORT_PIXEL_RATIO;
                 if (svg) {
                     // Get actual SVG dimensions
                     const svgRect = svg.getBoundingClientRect();
                     const width = svgRect.width;
                     const height = svgRect.height;
+
+                    // Calculate optimal pixel ratio for this image size
+                    pixelRatio = calculatePixelRatio(width, height);
 
                     // Set element size to match SVG
                     element.style.width = `${width}px`;
@@ -50,8 +68,8 @@ export function useExport(): UseExportResult {
                 }
 
                 const dataUrl = await toPng(element, {
-                    pixelRatio: EXPORT_PIXEL_RATIO,
-                    backgroundColor: '#1a1a2e',
+                    pixelRatio,
+                    backgroundColor: backgroundColor || '#1a1a2e',
                     cacheBust: true,
                     style: {
                         transform: 'none',
@@ -82,6 +100,10 @@ export function useExport(): UseExportResult {
             const originalTransform = element.style.transform;
             const originalOverflow = element.style.overflow;
 
+            // Get current theme background color
+            const computedStyle = getComputedStyle(document.documentElement);
+            const backgroundColor = computedStyle.getPropertyValue('--background-color').trim();
+
             try {
                 // Reset transform and hide scrollbar for export
                 element.style.transform = 'none';
@@ -89,11 +111,15 @@ export function useExport(): UseExportResult {
 
                 // Get the SVG element for accurate dimensions
                 const svg = element.querySelector('svg');
+                let pixelRatio = EXPORT_PIXEL_RATIO;
                 if (svg) {
                     // Get actual SVG dimensions
                     const svgRect = svg.getBoundingClientRect();
                     const width = svgRect.width;
                     const height = svgRect.height;
+
+                    // Calculate optimal pixel ratio for this image size
+                    pixelRatio = calculatePixelRatio(width, height);
 
                     // Set element size to match SVG
                     element.style.width = `${width}px`;
@@ -101,8 +127,8 @@ export function useExport(): UseExportResult {
                 }
 
                 const dataUrl = await toJpeg(element, {
-                    pixelRatio: EXPORT_PIXEL_RATIO,
-                    backgroundColor: '#1a1a2e',
+                    pixelRatio,
+                    backgroundColor: backgroundColor || '#1a1a2e',
                     quality: 0.95,
                     cacheBust: true,
                     style: {
