@@ -1,16 +1,7 @@
 import { useEffect, useState, useCallback, useRef } from 'preact/hooks';
 import mermaid from 'mermaid';
-import { MERMAID_CONFIG } from '../utils/constants';
-
-// Initialize mermaid once
-let mermaidInitialized = false;
-
-function initMermaid() {
-    if (!mermaidInitialized) {
-        mermaid.initialize(MERMAID_CONFIG);
-        mermaidInitialized = true;
-    }
-}
+import { getMermaidConfig } from '../utils/constants';
+import type { Theme } from './useTheme';
 
 interface UseMermaidResult {
     svg: string | null;
@@ -18,14 +9,19 @@ interface UseMermaidResult {
     isRendering: boolean;
 }
 
-export function useMermaid(code: string): UseMermaidResult {
+export function useMermaid(code: string, theme: Theme): UseMermaidResult {
     const [svg, setSvg] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [isRendering, setIsRendering] = useState(false);
     const renderIdRef = useRef(0);
+    const initializedThemeRef = useRef<Theme | null>(null);
 
-    const renderDiagram = useCallback(async (diagramCode: string) => {
-        initMermaid();
+    const renderDiagram = useCallback(async (diagramCode: string, currentTheme: Theme) => {
+        // Initialize or re-initialize mermaid if theme changed
+        if (initializedThemeRef.current !== currentTheme) {
+            mermaid.initialize(getMermaidConfig(currentTheme));
+            initializedThemeRef.current = currentTheme;
+        }
 
         const currentRenderId = ++renderIdRef.current;
         setIsRendering(true);
@@ -56,12 +52,12 @@ export function useMermaid(code: string): UseMermaidResult {
 
     useEffect(() => {
         if (code.trim()) {
-            renderDiagram(code);
+            renderDiagram(code, theme);
         } else {
             setSvg(null);
             setError(null);
         }
-    }, [code, renderDiagram]);
+    }, [code, theme, renderDiagram]);
 
     return { svg, error, isRendering };
 }

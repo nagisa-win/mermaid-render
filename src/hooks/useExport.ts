@@ -19,6 +19,42 @@ function calculatePixelRatio(width: number, height: number): number {
     return Math.min(Math.max(EXPORT_PIXEL_RATIO, minRatio), 4);
 }
 
+function getSvgDimensions(svg: SVGSVGElement): { width: number; height: number } {
+    // Try to get dimensions from viewBox first
+    const viewBox = svg.getAttribute('viewBox');
+    if (viewBox) {
+        const parts = viewBox.split(/\s+|,/).map(Number);
+        if (parts.length >= 4 && parts[2] > 0 && parts[3] > 0) {
+            return { width: parts[2], height: parts[3] };
+        }
+    }
+
+    // Fall back to width/height attributes
+    const widthAttr = svg.getAttribute('width');
+    const heightAttr = svg.getAttribute('height');
+    if (widthAttr && heightAttr) {
+        const width = parseFloat(widthAttr);
+        const height = parseFloat(heightAttr);
+        if (width > 0 && height > 0) {
+            return { width, height };
+        }
+    }
+
+    // Last resort: use getBoundingClientRect (may be affected by transforms)
+    const rect = svg.getBoundingClientRect();
+    return { width: rect.width, height: rect.height };
+}
+
+function getSvgBackgroundColor(): string {
+    const computedStyle = getComputedStyle(document.documentElement);
+    const bgColor = computedStyle.getPropertyValue('--background-color').trim();
+    // Convert to hex if it's a color name or rgb
+    if (bgColor) {
+        return bgColor;
+    }
+    return '#002b36'; // Solarized dark base
+}
+
 export function useExport(): UseExportResult {
     const [isExporting, setIsExporting] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -37,39 +73,46 @@ export function useExport(): UseExportResult {
             setIsExporting(true);
             setError(null);
 
+            const svg = element.querySelector('svg');
+            if (!svg) {
+                setError('No diagram found');
+                setIsExporting(false);
+                return;
+            }
+
             // Save original styles
             const originalTransform = element.style.transform;
             const originalOverflow = element.style.overflow;
-
-            // Get current theme background color
-            const computedStyle = getComputedStyle(document.documentElement);
-            const backgroundColor = computedStyle.getPropertyValue('--background-color').trim();
+            const originalWidth = element.style.width;
+            const originalHeight = element.style.height;
+            const originalSvgStyle = svg.getAttribute('style');
 
             try {
-                // Reset transform and hide scrollbar for export
+                // Get actual SVG dimensions (before any transforms)
+                const { width, height } = getSvgDimensions(svg);
+                const padding = 20;
+                const exportWidth = width + padding * 2;
+                const exportHeight = height + padding * 2;
+
+                // Calculate optimal pixel ratio
+                const pixelRatio = calculatePixelRatio(width, height);
+
+                // Get background color matching the current theme
+                const backgroundColor = getSvgBackgroundColor();
+
+                // Reset transforms and set exact dimensions
                 element.style.transform = 'none';
                 element.style.overflow = 'visible';
+                element.style.width = `${exportWidth}px`;
+                element.style.height = `${exportHeight}px`;
 
-                // Get the SVG element for accurate dimensions
-                const svg = element.querySelector('svg');
-                let pixelRatio = EXPORT_PIXEL_RATIO;
-                if (svg) {
-                    // Get actual SVG dimensions
-                    const svgRect = svg.getBoundingClientRect();
-                    const width = svgRect.width;
-                    const height = svgRect.height;
-
-                    // Calculate optimal pixel ratio for this image size
-                    pixelRatio = calculatePixelRatio(width, height);
-
-                    // Set element size to match SVG
-                    element.style.width = `${width}px`;
-                    element.style.height = `${height}px`;
-                }
+                // Remove any transform from SVG and position it
+                svg.style.transform = 'none';
+                svg.style.margin = `${padding}px`;
 
                 const dataUrl = await toPng(element, {
                     pixelRatio,
-                    backgroundColor: backgroundColor || '#1a1a2e',
+                    backgroundColor,
                     cacheBust: true,
                     style: {
                         transform: 'none',
@@ -83,8 +126,13 @@ export function useExport(): UseExportResult {
                 // Restore original styles
                 element.style.transform = originalTransform;
                 element.style.overflow = originalOverflow;
-                element.style.width = '';
-                element.style.height = '';
+                element.style.width = originalWidth;
+                element.style.height = originalHeight;
+                if (originalSvgStyle) {
+                    svg.setAttribute('style', originalSvgStyle);
+                } else {
+                    svg.removeAttribute('style');
+                }
                 setIsExporting(false);
             }
         },
@@ -96,39 +144,46 @@ export function useExport(): UseExportResult {
             setIsExporting(true);
             setError(null);
 
+            const svg = element.querySelector('svg');
+            if (!svg) {
+                setError('No diagram found');
+                setIsExporting(false);
+                return;
+            }
+
             // Save original styles
             const originalTransform = element.style.transform;
             const originalOverflow = element.style.overflow;
-
-            // Get current theme background color
-            const computedStyle = getComputedStyle(document.documentElement);
-            const backgroundColor = computedStyle.getPropertyValue('--background-color').trim();
+            const originalWidth = element.style.width;
+            const originalHeight = element.style.height;
+            const originalSvgStyle = svg.getAttribute('style');
 
             try {
-                // Reset transform and hide scrollbar for export
+                // Get actual SVG dimensions (before any transforms)
+                const { width, height } = getSvgDimensions(svg);
+                const padding = 20;
+                const exportWidth = width + padding * 2;
+                const exportHeight = height + padding * 2;
+
+                // Calculate optimal pixel ratio
+                const pixelRatio = calculatePixelRatio(width, height);
+
+                // Get background color matching the current theme
+                const backgroundColor = getSvgBackgroundColor();
+
+                // Reset transforms and set exact dimensions
                 element.style.transform = 'none';
                 element.style.overflow = 'visible';
+                element.style.width = `${exportWidth}px`;
+                element.style.height = `${exportHeight}px`;
 
-                // Get the SVG element for accurate dimensions
-                const svg = element.querySelector('svg');
-                let pixelRatio = EXPORT_PIXEL_RATIO;
-                if (svg) {
-                    // Get actual SVG dimensions
-                    const svgRect = svg.getBoundingClientRect();
-                    const width = svgRect.width;
-                    const height = svgRect.height;
-
-                    // Calculate optimal pixel ratio for this image size
-                    pixelRatio = calculatePixelRatio(width, height);
-
-                    // Set element size to match SVG
-                    element.style.width = `${width}px`;
-                    element.style.height = `${height}px`;
-                }
+                // Remove any transform from SVG and position it
+                svg.style.transform = 'none';
+                svg.style.margin = `${padding}px`;
 
                 const dataUrl = await toJpeg(element, {
                     pixelRatio,
-                    backgroundColor: backgroundColor || '#1a1a2e',
+                    backgroundColor,
                     quality: 0.95,
                     cacheBust: true,
                     style: {
@@ -143,8 +198,13 @@ export function useExport(): UseExportResult {
                 // Restore original styles
                 element.style.transform = originalTransform;
                 element.style.overflow = originalOverflow;
-                element.style.width = '';
-                element.style.height = '';
+                element.style.width = originalWidth;
+                element.style.height = originalHeight;
+                if (originalSvgStyle) {
+                    svg.setAttribute('style', originalSvgStyle);
+                } else {
+                    svg.removeAttribute('style');
+                }
                 setIsExporting(false);
             }
         },

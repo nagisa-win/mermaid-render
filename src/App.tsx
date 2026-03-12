@@ -16,10 +16,10 @@ export function App() {
         return saved || DEFAULT_CODE;
     });
 
-    const debouncedCode = useDebounce(code, DEBOUNCE_DELAY);
-    const { svg, error, isRendering } = useMermaid(debouncedCode);
-    const { exportToPng, exportToJpg, isExporting } = useExport();
     const { theme, toggleTheme } = useTheme();
+    const debouncedCode = useDebounce(code, DEBOUNCE_DELAY);
+    const { svg, error, isRendering } = useMermaid(debouncedCode, theme);
+    const { exportToPng, exportToJpg, isExporting } = useExport();
 
     useEffect(() => {
         localStorage.setItem(STORAGE_KEY, code);
@@ -55,7 +55,7 @@ export function App() {
                         <div class="panel-header">
                             <h2>Editor</h2>
                         </div>
-                        <Editor value={code} onChange={setCode} />
+                        <Editor value={code} onChange={setCode} theme={theme} />
                     </div>
                     <div class="preview-panel">
                         <div class="panel-header">

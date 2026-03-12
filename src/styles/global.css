@@ -1,34 +1,55 @@
+/* Solarized Dark Theme (default) */
 :root {
-    --primary-color: #4ecdc4;
-    --primary-hover: #3dbdb5;
-    --secondary-color: #ff6b6b;
-    --secondary-hover: #ff5252;
-    --background-color: #1a1a2e;
-    --surface-color: #16213e;
-    --surface-light: #1f3460;
-    --text-primary: #e8e8e8;
-    --text-secondary: #a0a0a0;
-    --border-color: #2a3a5a;
-    --error-color: #ff6b6b;
-    --success-color: #4ecdc4;
-    --shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    /* Solarized base colors */
+    --sol-base03: #002b36;
+    --sol-base02: #073642;
+    --sol-base01: #586e75;
+    --sol-base00: #657b83;
+    --sol-base0: #839496;
+    --sol-base1: #93a1a1;
+    --sol-base2: #eee8d5;
+    --sol-base3: #fdf6e3;
+    --sol-yellow: #b58900;
+    --sol-orange: #cb4b16;
+    --sol-red: #dc322f;
+    --sol-magenta: #d33682;
+    --sol-violet: #6c71c4;
+    --sol-blue: #268bd2;
+    --sol-cyan: #2aa198;
+    --sol-green: #859900;
+
+    /* Theme variables - Solarized Dark */
+    --primary-color: var(--sol-cyan);
+    --primary-hover: #219a97;
+    --secondary-color: var(--sol-orange);
+    --secondary-hover: #a63e0d;
+    --background-color: var(--sol-base03);
+    --surface-color: var(--sol-base02);
+    --surface-light: #094959;
+    --text-primary: var(--sol-base1);
+    --text-secondary: var(--sol-base01);
+    --border-color: #0a4a5a;
+    --error-color: var(--sol-red);
+    --success-color: var(--sol-green);
+    --shadow: 0 4px 6px rgba(0, 0, 0, 0.4);
     --radius: 8px;
     --transition: 0.2s ease-in-out;
 }
 
+/* Solarized Light Theme */
 [data-theme="light"] {
-    --primary-color: #0891b2;
-    --primary-hover: #0e7490;
-    --secondary-color: #dc2626;
-    --secondary-hover: #b91c1c;
-    --background-color: #f8fafc;
-    --surface-color: #ffffff;
-    --surface-light: #f1f5f9;
-    --text-primary: #1e293b;
-    --text-secondary: #64748b;
-    --border-color: #e2e8f0;
-    --error-color: #dc2626;
-    --success-color: #0891b2;
+    --primary-color: var(--sol-blue);
+    --primary-hover: #1e7bb0;
+    --secondary-color: var(--sol-orange);
+    --secondary-hover: #a63e0d;
+    --background-color: var(--sol-base3);
+    --surface-color: var(--sol-base2);
+    --surface-light: #e4dfcc;
+    --text-primary: var(--sol-base00);
+    --text-secondary: var(--sol-base1);
+    --border-color: #ccc5b5;
+    --error-color: var(--sol-red);
+    --success-color: var(--sol-green);
     --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
