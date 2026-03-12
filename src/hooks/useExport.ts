@@ -27,16 +27,46 @@ export function useExport(): UseExportResult {
             setIsExporting(true);
             setError(null);
 
+            // Save original styles
+            const originalTransform = element.style.transform;
+            const originalOverflow = element.style.overflow;
+
             try {
+                // Reset transform and hide scrollbar for export
+                element.style.transform = 'none';
+                element.style.overflow = 'visible';
+
+                // Get the SVG element for accurate dimensions
+                const svg = element.querySelector('svg');
+                if (svg) {
+                    // Get actual SVG dimensions
+                    const svgRect = svg.getBoundingClientRect();
+                    const width = svgRect.width;
+                    const height = svgRect.height;
+
+                    // Set element size to match SVG
+                    element.style.width = `${width}px`;
+                    element.style.height = `${height}px`;
+                }
+
                 const dataUrl = await toPng(element, {
                     pixelRatio: EXPORT_PIXEL_RATIO,
                     backgroundColor: '#1a1a2e',
                     cacheBust: true,
+                    style: {
+                        transform: 'none',
+                        overflow: 'visible',
+                    },
                 });
                 downloadImage(dataUrl, filename);
             } catch (err) {
                 setError(err instanceof Error ? err.message : 'Failed to export PNG');
             } finally {
+                // Restore original styles
+                element.style.transform = originalTransform;
+                element.style.overflow = originalOverflow;
+                element.style.width = '';
+                element.style.height = '';
                 setIsExporting(false);
             }
         },
@@ -48,17 +78,47 @@ export function useExport(): UseExportResult {
             setIsExporting(true);
             setError(null);
 
+            // Save original styles
+            const originalTransform = element.style.transform;
+            const originalOverflow = element.style.overflow;
+
             try {
+                // Reset transform and hide scrollbar for export
+                element.style.transform = 'none';
+                element.style.overflow = 'visible';
+
+                // Get the SVG element for accurate dimensions
+                const svg = element.querySelector('svg');
+                if (svg) {
+                    // Get actual SVG dimensions
+                    const svgRect = svg.getBoundingClientRect();
+                    const width = svgRect.width;
+                    const height = svgRect.height;
+
+                    // Set element size to match SVG
+                    element.style.width = `${width}px`;
+                    element.style.height = `${height}px`;
+                }
+
                 const dataUrl = await toJpeg(element, {
                     pixelRatio: EXPORT_PIXEL_RATIO,
                     backgroundColor: '#1a1a2e',
                     quality: 0.95,
                     cacheBust: true,
+                    style: {
+                        transform: 'none',
+                        overflow: 'visible',
+                    },
                 });
                 downloadImage(dataUrl, filename);
             } catch (err) {
                 setError(err instanceof Error ? err.message : 'Failed to export JPG');
             } finally {
+                // Restore original styles
+                element.style.transform = originalTransform;
+                element.style.overflow = originalOverflow;
+                element.style.width = '';
+                element.style.height = '';
                 setIsExporting(false);
             }
         },

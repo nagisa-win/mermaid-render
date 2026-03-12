@@ -24,16 +24,16 @@ export function App() {
     }, [code]);
 
     const handleExportPng = useCallback(async () => {
-        const previewElement = document.getElementById('preview-content');
-        if (previewElement) {
-            await exportToPng(previewElement, 'mermaid-diagram.png');
+        const diagramElement = document.getElementById('diagram-container');
+        if (diagramElement) {
+            await exportToPng(diagramElement, 'mermaid-diagram.png');
         }
     }, [exportToPng]);
 
     const handleExportJpg = useCallback(async () => {
-        const previewElement = document.getElementById('preview-content');
-        if (previewElement) {
-            await exportToJpg(previewElement, 'mermaid-diagram.jpg');
+        const diagramElement = document.getElementById('diagram-container');
+        if (diagramElement) {
+            await exportToJpg(diagramElement, 'mermaid-diagram.jpg');
         }
     }, [exportToJpg]);
 
