@@ -5,6 +5,7 @@ import { EXPORT_PIXEL_RATIO, MIN_EXPORT_WIDTH, MIN_EXPORT_HEIGHT } from '../util
 interface UseExportResult {
     exportToPng: (element: HTMLElement, filename: string) => Promise<void>;
     exportToJpg: (element: HTMLElement, filename: string) => Promise<void>;
+    copyPngToClipboard: (element: HTMLElement) => Promise<void>;
     isExporting: boolean;
     error: string | null;
 }
@@ -211,5 +212,66 @@ export function useExport(): UseExportResult {
         [downloadImage]
     );
 
-    return { exportToPng, exportToJpg, isExporting, error };
+    const copyPngToClipboard = useCallback(async (element: HTMLElement) => {
+        setIsExporting(true);
+        setError(null);
+
+        const svg = element.querySelector('svg');
+        if (!svg) {
+            setError('No diagram found');
+            setIsExporting(false);
+            return;
+        }
+
+        const originalTransform = element.style.transform;
+        const originalOverflow = element.style.overflow;
+        const originalWidth = element.style.width;
+        const originalHeight = element.style.height;
+        const originalSvgStyle = svg.getAttribute('style');
+
+        try {
+            const { width, height } = getSvgDimensions(svg);
+            const padding = 20;
+            const exportWidth = width + padding * 2;
+            const exportHeight = height + padding * 2;
+            const pixelRatio = calculatePixelRatio(width, height);
+            const backgroundColor = getSvgBackgroundColor();
+
+            element.style.transform = 'none';
+            element.style.overflow = 'visible';
+            element.style.width = `${exportWidth}px`;
+            element.style.height = `${exportHeight}px`;
+            svg.style.transform = 'none';
+            svg.style.margin = `${padding}px`;
+
+            const dataUrl = await toPng(element, {
+                pixelRatio,
+                backgroundColor,
+                cacheBust: true,
+                style: {
+                    transform: 'none',
+                    overflow: 'visible',
+                },
+            });
+
+            const response = await fetch(dataUrl);
+            const blob = await response.blob();
+            await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Failed to copy PNG to clipboard');
+        } finally {
+            element.style.transform = originalTransform;
+            element.style.overflow = originalOverflow;
+            element.style.width = originalWidth;
+            element.style.height = originalHeight;
+            if (originalSvgStyle) {
+                svg.setAttribute('style', originalSvgStyle);
+            } else {
+                svg.removeAttribute('style');
+            }
+            setIsExporting(false);
+        }
+    }, []);
+
+    return { exportToPng, exportToJpg, copyPngToClipboard, isExporting, error };
 }

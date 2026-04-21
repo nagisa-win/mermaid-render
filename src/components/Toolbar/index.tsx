@@ -3,13 +3,22 @@ import { Theme } from '../../hooks/useTheme';
 interface ToolbarProps {
     onExportPng: () => void;
     onExportJpg: () => void;
+    onCopyPng: () => void;
     isExporting: boolean;
     disabled: boolean;
     theme: Theme;
     onToggleTheme: () => void;
 }
 
-export function Toolbar({ onExportPng, onExportJpg, isExporting, disabled, theme, onToggleTheme }: ToolbarProps) {
+export function Toolbar({
+    onExportPng,
+    onExportJpg,
+    onCopyPng,
+    isExporting,
+    disabled,
+    theme,
+    onToggleTheme,
+}: ToolbarProps) {
     return (
         <header class="toolbar">
             <div class="toolbar-brand">
@@ -39,6 +48,14 @@ export function Toolbar({ onExportPng, onExportJpg, isExporting, disabled, theme
                     title="Export as JPG image"
                 >
                     {isExporting ? 'Export...' : 'Export JPG'}
+                </button>
+                <button
+                    class="btn btn-secondary"
+                    onClick={onCopyPng}
+                    disabled={disabled || isExporting}
+                    title="Copy PNG to clipboard"
+                >
+                    {isExporting ? 'Copying...' : 'Copy PNG'}
                 </button>
             </div>
         </header>

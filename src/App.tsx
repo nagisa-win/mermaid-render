@@ -19,7 +19,7 @@ export function App() {
     const { theme, toggleTheme } = useTheme();
     const debouncedCode = useDebounce(code, DEBOUNCE_DELAY);
     const { svg, error, isRendering } = useMermaid(debouncedCode, theme);
-    const { exportToPng, exportToJpg, isExporting } = useExport();
+    const { exportToPng, exportToJpg, copyPngToClipboard, isExporting } = useExport();
 
     useEffect(() => {
         localStorage.setItem(STORAGE_KEY, code);
@@ -39,12 +39,20 @@ export function App() {
         }
     }, [exportToJpg]);
 
+    const handleCopyPng = useCallback(async () => {
+        const diagramElement = document.getElementById('diagram-container');
+        if (diagramElement) {
+            await copyPngToClipboard(diagramElement);
+        }
+    }, [copyPngToClipboard]);
+
     return (
         <Layout>
             <div class="app-container">
                 <Toolbar
                     onExportPng={handleExportPng}
                     onExportJpg={handleExportJpg}
+                    onCopyPng={handleCopyPng}
                     isExporting={isExporting}
                     disabled={!svg}
                     theme={theme}
