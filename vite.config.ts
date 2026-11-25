@@ -3,7 +3,8 @@ import preact from "@preact/preset-vite";
 import { resolve } from "path";
 
 export default defineConfig({
-    base: "/mermaid-render/",
+    // 站点现在挂在自定义域 mermaid.8o.nz 的根路径下
+    base: "/",
     plugins: [preact()],
     resolve: {
         alias: {
